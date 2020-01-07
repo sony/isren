@@ -1,0 +1,20 @@
+{
+  "EMPTY_URL": "Git URL must not be empty!",
+  "MISSING_AUTH": "Git authentication (--auth) must not be empty!",
+  "SSL_ERROR": "Unable to verify SSL certificate",
+  "AUTH_ERROR": "User authentication error!",
+  "MISSING_PROJECT": "Project not found!",
+  "MISSING_ISSUES": "Issue listing failed!",
+  "NYI_IS_IMPLEMENTATION": "isImplementation() is not defined for",
+  "NYI_GET_ISSUES": "getIssues() is not defined for",
+  "NYI_AUTHENTICATE": "authenticate() is not defined for",
+  "TRANSFORM_PATH": "No such file exists in the given path",
+  "TRANSFORM_TYPE": "The input transform file is not a JavaScript file, only JavaScript transforms are supported",
+  "TRANSFORM_ERROR": "VM runtime error",
+  "UNKNOWN_OUTPUT": "Unknown output type:",
+  "CSV_TRANSFORM_ORDER": "Invalid issue format received in the CSV transform. Please ensure the CSV transform is not used after the Console transform.",
+  "FILE_TRANSFORM_NAME": "Output filename not defined. See --help for usage.",
+  "FILE_WRITE_ERROR": "Error when writing output file",
+  "INVALID_PARAMETERS": "Invalid function parameters given for",
+  "MISSING_FILE_OUT": "File Output name given, but the file output transform was not enabled. See --help for usage."
+}

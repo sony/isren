@@ -1,0 +1,60 @@
+{
+    "extends": "standard",
+    "plugins": [
+        "prettier"
+    ],
+    "rules": {
+        "prettier/prettier": [
+            "error",
+            {
+                "singleQuote": true
+            }
+        ],
+        "quotes": [
+            "error",
+            "single",
+            {
+                "allowTemplateLiterals": true
+            }
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "indent": "off",
+        "space-before-function-paren": "off",
+        "eol-last": [
+            "error",
+            "always"
+        ],
+        "callback-return": "error",
+        "no-else-return": "error",
+        "arrow-body-style": [
+            "error",
+            "as-needed"
+        ],
+        "object-shorthand": [
+            "error",
+            "properties"
+        ],
+        "prefer-template": "error",
+        "no-useless-concat": "error",
+        "no-useless-computed-key": "error",
+        "prefer-rest-params": "error",
+        "no-useless-rename": "error",
+        "prefer-numeric-literals": "error",
+        "no-duplicate-imports": "error",
+        "no-dupe-class-members": "error",
+        "no-const-assign": "error",
+        "arrow-spacing": "error",
+        "arrow-parens": [
+            "error",
+            "as-needed"
+        ]
+    },
+    "env": {
+        "browser": true,
+        "node": true,
+        "jest": true
+    }
+}
