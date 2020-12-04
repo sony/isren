@@ -1,7 +1,7 @@
 'use strict';
 
 const { URL } = require('url');
-const { Gitlab: Git } = require('gitlab');
+const { Gitlab: Git } = require('@gitbeaker/node');
 const Implementation = require('./index');
 const Logger = require('../Logger');
 const ERRORS = require('../ERRORS');
@@ -59,39 +59,36 @@ module.exports = class GitLab extends Implementation {
     const [path, host] = GitLab.parseURL(this.url);
     const api = new Git({
       token: this.auth,
-      host
+      host,
+      rejectUnauthorized: !this.insecure,
     });
-    const [, groups, group] = path.split('/');
-
-    // Determine what type of url we have.
-    let projectName, groupName;
-    if (/groups/gi.test(groups)) {
-      groupName = group;
-    } else {
-      groupName = groups;
-      projectName = group;
-    }
 
     try {
-      if (projectName !== undefined) {
-        const [currentProject] = (
-          await api.Projects.search(projectName)
-        ).filter(projectInfo => projectInfo.web_url.includes(path));
-        const projectId = currentProject.id;
+      const GROUPS = await api.Groups.all();
+      const PROJECTS = await api.Projects.all();
+      const PATH = path.slice(1).replace(/^(groups\/)/gi, '');
+      const group = GROUPS.find((g) => g.full_path === PATH);
+      const project = PROJECTS.find((p) => p.path_with_namespace === PATH);
+
+      Logger.debug(
+        `path=${PATH}, groups count=${GROUPS.length}, project count=${
+          PROJECTS.length
+        }, group=${!!group}, project=${!!project}`
+      );
+      if (!group && !project) return Logger.fatal(ERRORS.MISSING_PROJECT);
+      if (group && project)
+        return Logger.fatal(ERRORS.DUPLICATE_PROJECT_GROUP_NAME);
+      if (group) {
         console.log(
-          `Authentication success! Current project is ${path}(#${projectId})`
+          `Authentication success! Current group is ${group.full_path}(#${group.id})`
         );
-        return { api, projectId };
+        return { api, groupId: group.id };
       }
 
-      const [currentGroup] = (
-        await api.Groups.search(groupName)
-      ).filter(groupInfo => groupInfo.web_url.includes(path));
-      const groupId = currentGroup.id;
       console.log(
-        `Authentication success! Current group is ${path}(#${groupId})`
+        `Authentication success! Current project is ${project.path_with_namespace}(#${project.id})`
       );
-      return { api, groupId };
+      return { api, projectId: project.id };
     } catch (e) {
       if (e.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
         return Logger.fatal(e, ERRORS.SSL_ERROR);
@@ -117,13 +114,13 @@ module.exports = class GitLab extends Implementation {
     if (projectId) {
       issues = await api.Issues.all({
         projectId,
-        ...options
+        ...options,
       });
     }
     if (groupId) {
       issues = await api.Issues.all({
         groupId,
-        ...options
+        ...options,
       });
     }
 
@@ -162,7 +159,7 @@ module.exports = class GitLab extends Implementation {
       {}
     );
 
-    return issues.map(issue => {
+    return issues.map((issue) => {
       issue.project_name = projects[issue.project_id] || '';
       return issue;
     });

@@ -7,6 +7,17 @@ module.exports = {
   debugMode: false,
 
   /**
+   * Log a debug message.
+   *
+   * @param {String|Array} message
+   *   The debug message to log
+   */
+  debug(...message) {
+    if (!this.debugMode) return;
+    console.log(...message);
+  },
+
+  /**
    * Log an error.
    *
    * @param {Error|String} err

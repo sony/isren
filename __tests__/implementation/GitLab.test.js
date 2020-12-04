@@ -2,17 +2,16 @@
 
 const {
   projectSearch,
-  projectSearchAll,
   issueSearch,
   groupSearch,
   exit,
   consoleError,
-  beginsWith
+  beginsWith,
 } = require('../Harness');
 const ERRORS = require('../../src/ERRORS');
 const GitLab = require('../../src/implementation/Gitlab');
 
-describe.only('GitLab implementation', () => {
+describe('GitLab implementation', () => {
   describe('Core', () => {
     test('will exit and print errors if no settings exists', async () => {
       // eslint-disable-next-line no-new
@@ -47,7 +46,7 @@ describe.only('GitLab implementation', () => {
     test('will print no errors if both the url and auth token are supplied', async () => {
       // eslint-disable-next-line no-new
       new GitLab('https://testweb.gitlab.jp:1234/team/foo', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
 
       expect(consoleError).toHaveBeenCalledTimes(0);
@@ -97,7 +96,7 @@ describe.only('GitLab implementation', () => {
         GitLab.parseURL('https://gitlab.com/gitlab-com/support-forum/issues')
       ).toStrictEqual([
         '/gitlab-com/support-forum/issues',
-        'https://gitlab.com'
+        'https://gitlab.com',
       ]);
       expect(consoleError).toHaveBeenCalledTimes(0);
       expect(exit).toHaveBeenCalledTimes(0);
@@ -107,7 +106,7 @@ describe.only('GitLab implementation', () => {
   describe('authenticate', () => {
     test('will fail if the user doesnt have access to the project', async () => {
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       await git.authenticate();
 
@@ -119,16 +118,17 @@ describe.only('GitLab implementation', () => {
     });
 
     test('will return no errors and the api context if the user has access to the project', async () => {
-      projectSearchAll.mockResolvedValueOnce([]);
       projectSearch.mockResolvedValueOnce([
         {
           id: 114,
-          web_url: 'https://gitlab.com/gitlab-com/support-forum'
-        }
+          web_url: 'https://gitlab.com/gitlab-com/support-forum',
+          path_with_namespace: 'gitlab-com/support-forum',
+        },
       ]);
+      groupSearch.mockResolvedValueOnce([]);
 
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api, projectId, groupId } = await git.authenticate();
 
@@ -144,15 +144,17 @@ describe.only('GitLab implementation', () => {
     });
 
     test('will return no errors and the api context if the user has access to the group', async () => {
+      projectSearch.mockResolvedValueOnce([]);
       groupSearch.mockResolvedValueOnce([
         {
           id: 123,
-          web_url: 'https://gitlab.com/groups/gitlab-com'
-        }
+          web_url: 'https://gitlab.com/groups/gitlab-com',
+          full_path: 'gitlab-com',
+        },
       ]);
 
       const git = new GitLab('https://gitlab.com/groups/gitlab-com', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api, projectId, groupId } = await git.authenticate();
 
@@ -170,16 +172,17 @@ describe.only('GitLab implementation', () => {
 
   describe('getIssues', () => {
     test('will not return any issues if the user does not have access to the project', async () => {
-      projectSearchAll.mockResolvedValueOnce([]);
       projectSearch.mockResolvedValueOnce([
         {
           id: 114,
-          web_url: 'https://gitlab.com/gitlab-com/support-forum'
-        }
+          web_url: 'https://gitlab.com/gitlab-com/support-forum',
+          path_with_namespace: 'gitlab-com/support-forum',
+        },
       ]);
+      groupSearch.mockResolvedValueOnce([]);
 
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api } = await git.authenticate();
       await git.getIssues({ api, projectId: 9999 });
@@ -192,16 +195,17 @@ describe.only('GitLab implementation', () => {
     });
 
     test('will not return any issues if the user does not have access to the group', async () => {
-      projectSearchAll.mockResolvedValueOnce([]);
       projectSearch.mockResolvedValueOnce([
         {
           id: 114,
-          web_url: 'https://gitlab.com/gitlab-com/support-forum'
-        }
+          web_url: 'https://gitlab.com/gitlab-com/support-forum',
+          path_with_namespace: 'gitlab-com/support-forum',
+        },
       ]);
+      groupSearch.mockResolvedValueOnce([]);
 
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api } = await git.authenticate();
       await git.getIssues({ api, groupId: 7777 });
@@ -217,20 +221,21 @@ describe.only('GitLab implementation', () => {
       const MOCK_ISSUES = [
         {
           issue: 'foo issue',
-          test: 'pass'
-        }
+          test: 'pass',
+        },
       ];
-      projectSearchAll.mockResolvedValueOnce([]);
-      projectSearch.mockResolvedValueOnce([
+      projectSearch.mockResolvedValue([
         {
           id: 114,
-          web_url: 'https://gitlab.com/gitlab-com/support-forum'
-        }
+          web_url: 'https://gitlab.com/gitlab-com/support-forum',
+          path_with_namespace: 'gitlab-com/support-forum',
+        },
       ]);
-      issueSearch.mockResolvedValueOnce(MOCK_ISSUES);
+      groupSearch.mockResolvedValue([]);
+      issueSearch.mockResolvedValue(MOCK_ISSUES);
 
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api, projectId, groupId } = await git.authenticate();
       const issues = await git.getIssues({ api, projectId: 114 });
@@ -251,19 +256,21 @@ describe.only('GitLab implementation', () => {
       const MOCK_ISSUES = [
         {
           issue: 'foo issue',
-          test: 'pass'
-        }
+          test: 'pass',
+        },
       ];
-      groupSearch.mockResolvedValueOnce([
+      projectSearch.mockResolvedValue([]);
+      groupSearch.mockResolvedValue([
         {
           id: 123,
-          web_url: 'https://gitlab.com/groups/gitlab-com'
-        }
+          web_url: 'https://gitlab.com/groups/gitlab-com',
+          full_path: 'gitlab-com',
+        },
       ]);
-      issueSearch.mockResolvedValueOnce(MOCK_ISSUES);
+      issueSearch.mockResolvedValue(MOCK_ISSUES);
 
       const git = new GitLab('https://gitlab.com/groups/gitlab-com', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api, projectId, groupId } = await git.authenticate();
       const issues = await git.getIssues({ api, groupId: 123 });
@@ -285,21 +292,21 @@ describe.only('GitLab implementation', () => {
         {
           id: 114,
           web_url: 'https://gitlab.com/gitlab-com/support-forum',
-          path_with_namespace: 'foo/bar/baz'
-        }
+          path_with_namespace: 'gitlab-com/support-forum',
+        },
       ];
-      projectSearchAll.mockReturnValue(projects);
-      projectSearch.mockReturnValue(projects);
-      issueSearch.mockReturnValue([
+      projectSearch.mockResolvedValue(projects);
+      groupSearch.mockResolvedValue([]);
+      issueSearch.mockResolvedValue([
         {
           project_id: 114,
           issue: 'foo issue',
-          test: 'pass'
-        }
+          test: 'pass',
+        },
       ]);
 
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api, projectId, groupId } = await git.authenticate();
       const issues = await git.getIssues({ api, projectId });
@@ -318,8 +325,8 @@ describe.only('GitLab implementation', () => {
           issue: 'foo issue',
           test: 'pass',
           project_id: 114,
-          project_name: 'foo/bar/baz'
-        }
+          project_name: 'gitlab-com/support-forum',
+        },
       ]);
     });
   });
@@ -327,7 +334,7 @@ describe.only('GitLab implementation', () => {
   describe('addProjectNames', () => {
     test('will fail if no api object is given', () => {
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       git.addProjectNames();
 
@@ -343,7 +350,7 @@ describe.only('GitLab implementation', () => {
 
     test('will fail if no issues array is given', () => {
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       git.addProjectNames({});
 
@@ -359,7 +366,7 @@ describe.only('GitLab implementation', () => {
 
     test('will fail if issues param is not an array (obj)', () => {
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       git.addProjectNames({}, {});
 
@@ -375,7 +382,7 @@ describe.only('GitLab implementation', () => {
 
     test('will fail if issues param is not an array (null)', () => {
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       git.addProjectNames({}, null);
 
@@ -391,7 +398,7 @@ describe.only('GitLab implementation', () => {
 
     test('will fail if issues param is not an array (string)', () => {
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       git.addProjectNames({}, '');
 
@@ -407,7 +414,7 @@ describe.only('GitLab implementation', () => {
 
     test('will fail if issues param is not an array (number)', () => {
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       git.addProjectNames({}, 1);
 
@@ -425,19 +432,20 @@ describe.only('GitLab implementation', () => {
       const projects = [
         {
           id: 1,
-          path_with_namespace: 'test/me'
-        }
+          path_with_namespace: 'gitlab-com/support-forum',
+        },
       ];
       const issues = [
         {
           project_id: 1,
-          issue: 'anything'
-        }
+          issue: 'anything',
+        },
       ];
-      projectSearchAll.mockReturnValue(projects);
+      projectSearch.mockReturnValue(projects);
+      groupSearch.mockReturnValue([]);
 
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api } = await git.authenticate();
 
@@ -450,8 +458,8 @@ describe.only('GitLab implementation', () => {
         {
           project_id: 1,
           issue: 'anything',
-          project_name: 'test/me'
-        }
+          project_name: 'gitlab-com/support-forum',
+        },
       ]);
     });
 
@@ -459,19 +467,20 @@ describe.only('GitLab implementation', () => {
       const projects = [
         {
           id: 2,
-          path_with_namespace: 'test/me'
-        }
+          path_with_namespace: 'gitlab-com/support-forum',
+        },
       ];
       const issues = [
         {
           project_id: 1,
-          issue: 'anything'
-        }
+          issue: 'anything',
+        },
       ];
-      projectSearchAll.mockReturnValue(projects);
+      projectSearch.mockReturnValue(projects);
+      groupSearch.mockReturnValue([]);
 
       const git = new GitLab('https://gitlab.com/gitlab-com/support-forum', {
-        auth: 'token_secret'
+        auth: 'token_secret',
       });
       const { api } = await git.authenticate();
 
@@ -484,8 +493,8 @@ describe.only('GitLab implementation', () => {
         {
           project_id: 1,
           issue: 'anything',
-          project_name: ''
-        }
+          project_name: '',
+        },
       ]);
     });
   });
