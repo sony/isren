@@ -14,6 +14,7 @@ module.exports = class Implementation {
     this.url = url;
     this.cmd = cmd;
     this.auth = this.cmd.auth || AUTH;
+    this.insecure = false;
 
     // Output type normalization from string to array of strings.
     this.cmd.out = normalizeOutput(this.cmd.out);
@@ -26,10 +27,8 @@ module.exports = class Implementation {
       return Logger.fatal(ERRORS.FILE_TRANSFORM_NAME);
     }
 
-    // Note: The `rejectUnauthorized` parameter is not working, this is a
-    // temporary work-around
     if (this.cmd.insecure) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+      this.insecure = true;
     }
 
     if (!this.url) {

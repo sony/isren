@@ -3,21 +3,19 @@
 const fs = require('fs');
 const Outputs = require('../src/outputs');
 const projectSearch = jest.fn();
-const projectSearchAll = jest.fn();
 const issueSearch = jest.fn();
 const groupSearch = jest.fn();
 
-jest.spyOn(require('gitlab'), 'Gitlab').mockImplementation(() => ({
+jest.spyOn(require('@gitbeaker/node'), 'Gitlab').mockImplementation(() => ({
   Projects: {
-    search: projectSearch,
-    all: projectSearchAll
+    all: projectSearch,
   },
   Issues: {
-    all: issueSearch
+    all: issueSearch,
   },
   Groups: {
-    search: groupSearch
-  }
+    all: groupSearch,
+  },
 }));
 
 const exit = jest.fn();
@@ -36,7 +34,6 @@ const fileOutput = jest.spyOn(Outputs, 'File');
 
 beforeEach(() => {
   projectSearch.mockClear();
-  projectSearchAll.mockClear();
   issueSearch.mockClear();
   groupSearch.mockClear();
   exit.mockClear();
@@ -49,12 +46,11 @@ beforeEach(() => {
   writeFile.mockClear();
 });
 
-const beginsWith = input =>
+const beginsWith = (input) =>
   new RegExp(`^${input.toString().replace(/[()[\]\\/]/gim, '\\$&')}`);
 
 module.exports = {
   projectSearch,
-  projectSearchAll,
   issueSearch,
   groupSearch,
   exit,
@@ -65,5 +61,5 @@ module.exports = {
   csvOutput,
   fileOutput,
   writeFile,
-  beginsWith
+  beginsWith,
 };

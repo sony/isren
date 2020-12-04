@@ -4,6 +4,7 @@
   "SSL_ERROR": "Unable to verify SSL certificate",
   "AUTH_ERROR": "User authentication error!",
   "MISSING_PROJECT": "Project not found!",
+  "DUPLICATE_PROJECT_GROUP_NAME": "A project and group with the same name exist!",
   "MISSING_ISSUES": "Issue listing failed!",
   "NYI_IS_IMPLEMENTATION": "isImplementation() is not defined for",
   "NYI_GET_ISSUES": "getIssues() is not defined for",
