@@ -7,7 +7,7 @@
 
 ## GitLab
 
-To get ISREN working for GitLab, you much provide an _Access Token_. The Token
+To get ISREN working for GitLab, you must provide an _Access Token_. The Token
 can be provided in one of two places:
 
 - `.env` file
